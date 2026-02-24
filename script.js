@@ -463,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.classList.add('hidden');
       playback.classList.remove('hidden');
       objektVideo.style.opacity = '0'; // Temporarily hide during playback
+      objektVideo.style.pointerEvents = 'none'; // Prevent invisible Fancam from blocking Play/Pause clicks
       recordBtn.classList.add('hidden');
       downloadBtn.classList.remove('hidden');
       resetBtn.classList.remove('hidden');
@@ -570,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
     preview.classList.remove('hidden');
     playback.classList.add('hidden');
     objektVideo.style.opacity = '1';
+    objektVideo.style.pointerEvents = 'auto'; // Re-enable multitouch controls for next record
 
     recordBtn.classList.remove('hidden');
     downloadBtn.classList.add('hidden');
