@@ -273,14 +273,14 @@ document.addEventListener('DOMContentLoaded', () => {
         combinedStream = stream;
       }
 
-      // Use mp4/webm depending on browser support. Enforce 2.5Mbps compressed bitrate to save phone storage.
-      let options = { mimeType: 'video/webm; codecs=vp9,opus', videoBitsPerSecond: 2500000 };
+      // Use mp4/webm depending on browser support. Enforce 1.0 Mbps compressed bitrate to maximize phone storage.
+      let options = { mimeType: 'video/webm; codecs=vp9,opus', videoBitsPerSecond: 1000000 };
       if (MediaRecorder.isTypeSupported('video/mp4')) {
-        options = { mimeType: 'video/mp4', videoBitsPerSecond: 2500000 };
+        options = { mimeType: 'video/mp4', videoBitsPerSecond: 1000000 };
       } else if (MediaRecorder.isTypeSupported('video/webm; codecs=vp8,opus')) {
-        options = { mimeType: 'video/webm; codecs=vp8,opus', videoBitsPerSecond: 2500000 };
+        options = { mimeType: 'video/webm; codecs=vp8,opus', videoBitsPerSecond: 1000000 };
       } else if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm', videoBitsPerSecond: 2500000 };
+        options = { mimeType: 'video/webm', videoBitsPerSecond: 1000000 };
       }
 
       mediaRecorder = new MediaRecorder(combinedStream, options);
