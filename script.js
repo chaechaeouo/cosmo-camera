@@ -90,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add default unselected option for objects
     const objektDefault = document.createElement('div');
     objektDefault.className = 'custom-option';
-    objektDefault.textContent = 'Select an Objekt';
+    objektDefault.textContent = 'Member';
     objektDefault.style.color = '#888';
-    objektDefault.addEventListener('click', () => selectObjekt('', 'Select an Objekt'));
+    objektDefault.addEventListener('click', () => selectObjekt('', 'Member'));
     objektOptions.appendChild(objektDefault);
 
-    objektLabel.textContent = 'Select an Objekt';
+    objektLabel.textContent = 'Member';
 
     objektVideo.removeAttribute('crossOrigin');
     objektVideo.src = "";
