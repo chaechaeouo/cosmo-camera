@@ -477,3 +477,22 @@ button.secondary-btn {
     transform: translateY(0);
   }
 }
+
+/* Aggressive mobile squishing for small viewports so 50/50 dual dropdowns fit perfectly */
+@media (max-width: 400px) {
+  .selection-row {
+    gap: 6px;
+  }
+
+  .secondary-btn {
+    height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .secondary-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
