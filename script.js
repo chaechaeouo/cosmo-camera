@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isCountingDown = false;
   let countdownTimerId = null;
   let activeMicStream = null;
-  let objektState = { x: 0, y: 0, scale: 1, rotation: 0 };
+  let objektState = { x: 0, y: 0, scale: 1, rotation: -15 };
   let startTouches = [];
   let initialObjektState = null;
   let selectedObjektName = "Cosmo";
@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedObjektName = "Cosmo";
 
     // Reset multi-touch state
-    objektState = { x: 0, y: 0, scale: 1, rotation: 0 };
-    objektVideo.style.transform = `translate(0px, 0px) rotate(0deg) scale(1)`;
+    objektState = { x: 0, y: 0, scale: 1, rotation: -15 };
+    objektVideo.style.transform = `translate(0px, 0px) rotate(-15deg) scale(1)`;
 
     if (season && videoData[season]) {
       let optionsData = videoData[season].map(fileName => {
