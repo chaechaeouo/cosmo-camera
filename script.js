@@ -7,8 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText = document.getElementById('status-text');
   const countdownProgress = document.getElementById('countdown-progress');
   const progressFill = document.getElementById('progress-fill');
-  const seasonSelect = document.getElementById('season-select');
-  const objektSelect = document.getElementById('objekt-select');
+  const seasonDisplay = document.getElementById('season-display');
+  const seasonLabel = document.getElementById('season-label');
+  const seasonOptions = document.getElementById('season-options');
+  const objektDisplay = document.getElementById('objekt-display');
+  const objektLabel = document.getElementById('objekt-label');
+  const objektOptions = document.getElementById('objekt-options');
   const objektVideo = document.getElementById('objekt-video');
   const flipBtn = document.getElementById('flip-camera-btn');
 
@@ -36,18 +40,61 @@ document.addEventListener('DOMContentLoaded', () => {
   // Map of seasons and videos
   const videoData = { "Binary02 501z": ["binary02-chaewon-501z.mp4", "binary02-chaeyeon-501z.mp4", "binary02-dahyun-501z.mp4", "binary02-hayeon-501z.mp4", "binary02-hyerin-501z.mp4", "binary02-jiwoo-501z.mp4", "binary02-jiyeon-501z.mp4", "binary02-joobin-501z.mp4", "binary02-kaede-501z.mp4", "binary02-kotone-501z.mp4", "binary02-lynn-501z.mp4", "binary02-mayu-501z.mp4", "binary02-nakyoung-501z.mp4", "binary02-nien-501z.mp4", "binary02-seoah-501z.mp4", "binary02-seoyeon-501z.mp4", "binary02-shion-501z.mp4", "binary02-sohyun-501z.mp4", "binary02-soomin-501z.mp4", "binary02-sullin-501z.mp4", "binary02-xinyu-501z.mp4", "binary02-yeonji-501z.mp4", "binary02-yooyeon-501z.mp4", "binary02-yubin-501z.mp4"], "Binary02 502z": ["binary02-chaewon-502z.mp4", "binary02-chaeyeon-502z.mp4", "binary02-dahyun-502z.mp4", "binary02-hayeon-502z.mp4", "binary02-hyerin-502z.mp4", "binary02-jiwoo-502z.mp4", "binary02-jiyeon-502z.mp4", "binary02-joobin-502z.mp4", "binary02-kaede-502z.mp4", "binary02-kotone-502z.mp4", "binary02-lynn-502z.mp4", "binary02-mayu-502z.mp4", "binary02-nakyoung-502z.mp4", "binary02-nien-502z.mp4", "binary02-seoah-502z.mp4", "binary02-seoyeon-502z.mp4", "binary02-shion-502z.mp4", "binary02-sohyun-502z.mp4", "binary02-soomin-502z.mp4", "binary02-sullin-502z.mp4", "binary02-xinyu-502z.mp4", "binary02-yeonji-502z.mp4", "binary02-yooyeon-502z.mp4", "binary02-yubin-502z.mp4"] };
 
-  // Populate seasons
-  Object.keys(videoData).forEach(season => {
-    const option = document.createElement('option');
-    option.value = season;
-    option.textContent = season;
-    seasonSelect.appendChild(option);
+  // Custom Dropdown UI Interaction Handlers
+  document.addEventListener('click', (e) => {
+    // Dismiss glassmorphism menus when clicking outside
+    if (!e.target.closest('#season-wrapper')) seasonOptions.classList.remove('open');
+    if (!e.target.closest('#objekt-wrapper')) objektOptions.classList.remove('open');
   });
 
-  // Handle season selection to populate objekte
-  seasonSelect.addEventListener('change', (e) => {
-    // Clear objekt select
-    objektSelect.innerHTML = '<option value="">Select an Objekt</option>';
+  seasonDisplay.addEventListener('click', () => {
+    objektOptions.classList.remove('open'); // Close other menu
+    seasonOptions.classList.toggle('open');
+  });
+
+  objektDisplay.addEventListener('click', () => {
+    seasonOptions.classList.remove('open'); // Close other menu
+    objektOptions.classList.toggle('open');
+  });
+
+  // Prepend a default reset option
+  const seasonDefault = document.createElement('div');
+  seasonDefault.className = 'custom-option';
+  seasonDefault.textContent = 'Season/Edition';
+  seasonDefault.style.color = '#888';
+  seasonDefault.addEventListener('click', () => selectSeason(''));
+  seasonOptions.appendChild(seasonDefault);
+
+  // Hydrate custom season menu
+  Object.keys(videoData).forEach(season => {
+    const option = document.createElement('div');
+    option.className = 'custom-option';
+    option.textContent = season;
+    option.addEventListener('click', () => selectSeason(season));
+    seasonOptions.appendChild(option);
+  });
+
+  function selectSeason(season) {
+    if (!season) {
+      seasonLabel.textContent = 'Season/Edition';
+    } else {
+      seasonLabel.textContent = season;
+    }
+    seasonOptions.classList.remove('open');
+
+    // Reset objekt select
+    objektOptions.innerHTML = '';
+
+    // Add default unselected option for objects
+    const objektDefault = document.createElement('div');
+    objektDefault.className = 'custom-option';
+    objektDefault.textContent = 'Select an Objekt';
+    objektDefault.style.color = '#888';
+    objektDefault.addEventListener('click', () => selectObjekt('', 'Select an Objekt'));
+    objektOptions.appendChild(objektDefault);
+
+    objektLabel.textContent = 'Select an Objekt';
+
     objektVideo.removeAttribute('crossOrigin');
     objektVideo.src = "";
     selectedObjektName = "Cosmo";
@@ -56,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     objektState = { x: 0, y: 0, scale: 1, rotation: 0 };
     objektVideo.style.transform = `translate(0px, 0px) rotate(0deg) scale(1)`;
 
-    const season = e.target.value;
     if (season && videoData[season]) {
       let optionsData = videoData[season].map(fileName => {
         const namePart = fileName.split('-')[1]; // chaewon
@@ -64,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return { fileName, namePart, displayName };
       });
 
-      // Sort according to official member S-number
+      // Sort meticulously via Official TripleS S-numbers
       optionsData.sort((a, b) => {
         const indexA = memberOrder.indexOf(a.namePart);
         const indexB = memberOrder.indexOf(b.namePart);
@@ -75,29 +121,30 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       optionsData.forEach(item => {
-        const option = document.createElement('option');
-        option.value = `videos/tripleS/${season}/${item.fileName}`;
+        const option = document.createElement('div');
+        option.className = 'custom-option';
         option.textContent = item.displayName;
-        option.dataset.name = item.displayName;
-        objektSelect.appendChild(option);
+        option.addEventListener('click', () => selectObjekt(`videos/tripleS/${season}/${item.fileName}`, item.displayName));
+        objektOptions.appendChild(option);
       });
     }
-  });
+  }
 
-  // Handle video selection
-  objektSelect.addEventListener('change', (e) => {
-    const selectedOption = e.target.options[e.target.selectedIndex];
-    if (e.target.value) {
-      // Required to prevent canvas tainting on GitHub pages / CDNs
+  function selectObjekt(videoSrc, displayName) {
+    objektLabel.textContent = displayName;
+    objektOptions.classList.remove('open');
+
+    if (videoSrc) {
+      // Mount the video node dynamically (cors enabled)
       objektVideo.crossOrigin = "anonymous";
-      objektVideo.src = e.target.value;
-      selectedObjektName = selectedOption.dataset.name;
+      objektVideo.src = videoSrc;
+      selectedObjektName = displayName;
     } else {
       objektVideo.removeAttribute('crossOrigin');
       objektVideo.src = "";
       selectedObjektName = "Cosmo";
     }
-  });
+  }
 
   // Canvas for recording
   const canvas = document.createElement('canvas');

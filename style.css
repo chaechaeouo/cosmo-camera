@@ -305,10 +305,6 @@ body {
   gap: 8px;
   backdrop-filter: blur(10px);
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, opacity 0.2s;
-  max-width: 140px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 .secondary-btn:hover {
@@ -320,18 +316,74 @@ body {
   /* Bouncy press animation identical to record button */
 }
 
-/* Select Dropdown Styling */
-select.secondary-btn {
-  outline: none;
-  width: 160px;
-  /* Force both dropdowns to identically share the identical exact width */
-  text-align: center;
+/* Premium Custom Dropdown Container */
+.custom-select-wrapper {
+  position: relative;
+  width: 175px;
+  /* Widened strictly to guarantee long text truncation without colliding with SVG */
 }
 
-select.secondary-btn option {
-  background-color: #1a1a1a;
-  color: #ffffff;
-  padding: 12px;
+.custom-select {
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Internal span geometry enforcing pure truncation boundaries */
+.custom-select span {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* The actual floating glassmorphism list */
+.custom-options {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  /* Deploy upwards aggressively avoiding screen bottom limits */
+  left: 0;
+  width: 100%;
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-options.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.custom-option {
+  padding: 14px 20px;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.custom-option:last-child {
+  border-bottom: none;
+}
+
+.custom-option:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Force round perfectly circular look for the pure icon buttons */

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Cosmo Camera</title>
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=17">
   <!-- Using Google Fonts for modern typography -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -37,12 +37,27 @@
     <!-- Controls -->
     <div class="controls">
       <!-- Video Selection -->
-      <select id="season-select" class="secondary-btn">
-        <option value="">Season/Edition</option>
-      </select>
-      <select id="objekt-select" class="secondary-btn">
-        <option value="">Select an Objekt</option>
-      </select>
+      <div class="custom-select-wrapper" id="season-wrapper">
+        <div class="secondary-btn custom-select" id="season-display">
+          <span id="season-label">Season/Edition</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="custom-options" id="season-options"></div>
+      </div>
+
+      <div class="custom-select-wrapper" id="objekt-wrapper">
+        <div class="secondary-btn custom-select" id="objekt-display">
+          <span id="objekt-label">Select an Objekt</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="custom-options" id="objekt-options"></div>
+      </div>
 
       <button id="flip-camera-btn" class="secondary-btn" title="Flip Camera">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
