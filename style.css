@@ -174,12 +174,15 @@ body {
 }
 
 .controls {
+  position: relative;
+  /* Create docking context for absolute floating text */
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
-  margin-top: 30px;
+  margin-top: 50px;
+  /* Expanded empty gap underneath camera */
   min-height: 80px;
 }
 
@@ -248,7 +251,10 @@ body {
 
 .status-text {
   position: absolute;
-  bottom: 180px;
+  top: -35px;
+  /* Center it precisely inside the 50px physical gap */
+  bottom: auto;
+  /* Remove the old absolute bottom lock */
   left: 0;
   right: 0;
   text-align: center;
@@ -260,7 +266,9 @@ body {
 
 .progress-container {
   position: absolute;
-  bottom: 165px;
+  top: -15px;
+  /* Dock instantly beneath the status text in the identical gap */
+  bottom: auto;
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
