@@ -30,7 +30,8 @@ body {
 .app-container {
   width: 100%;
   max-width: 500px;
-  height: 100vh;
+  height: 100dvh;
+  /* Mobile Safari Address Bar exclusion */
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -283,16 +284,19 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
-  padding: 12px 20px;
-  border-radius: 20px;
+  height: 48px;
+  /* Force uniform pill size perfectly across dropdowns and buttons */
+  padding: 0 20px;
+  border-radius: 24px;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   backdrop-filter: blur(10px);
-  transition: background 0.2s;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, opacity 0.2s;
   max-width: 140px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -303,9 +307,17 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.secondary-btn:active {
+  transform: scale(0.92);
+  /* Bouncy press animation identical to record button */
+}
+
 /* Select Dropdown Styling */
 select.secondary-btn {
   outline: none;
+  width: 160px;
+  /* Force both dropdowns to identically share the identical exact width */
+  text-align: center;
 }
 
 select.secondary-btn option {
@@ -314,8 +326,11 @@ select.secondary-btn option {
   padding: 12px;
 }
 
-select.secondary-btn:focus {
-  border-color: var(--accent-color);
+/* Force round perfectly circular look for the pure icon buttons */
+button.secondary-btn {
+  width: 48px;
+  padding: 0;
+  border-radius: 50%;
 }
 
 /* Animations for controls */
