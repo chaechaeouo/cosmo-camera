@@ -121,6 +121,13 @@ body {
   display: none !important;
 }
 
+/* Hard geometric preservation for recording states */
+.invisible {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
 #countdown-overlay {
   position: absolute;
   top: 50%;

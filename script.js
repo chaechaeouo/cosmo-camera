@@ -473,10 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isRecording && !isCountingDown) statusText.style.opacity = '0';
     }, 2000);
 
-    // Restore UI
-    seasonWrapper.classList.remove('hidden');
-    objektWrapper.classList.remove('hidden');
-    flipBtn.classList.remove('hidden');
+    // Restore UI without collapsing physical layout sizes
+    seasonWrapper.classList.remove('invisible');
+    objektWrapper.classList.remove('invisible');
+    flipBtn.classList.remove('invisible');
     countdownProgress.classList.add('hidden');
 
     // Destroy microphone connection to halt background tracking
@@ -574,10 +574,10 @@ document.addEventListener('DOMContentLoaded', () => {
       isCountingDown = false;
       countdownProgress.classList.add('hidden');
 
-      // Hide UI selections when filming
-      seasonWrapper.classList.add('hidden');
-      objektWrapper.classList.add('hidden');
-      flipBtn.classList.add('hidden');
+      // Make UI transparent to maintain strict physical grid positioning
+      seasonWrapper.classList.add('invisible');
+      objektWrapper.classList.add('invisible');
+      flipBtn.classList.add('invisible');
 
       const finalizeStart = () => {
         mediaRecorder.start();
@@ -625,10 +625,10 @@ document.addEventListener('DOMContentLoaded', () => {
     progressFill.style.transition = 'width 3s linear';
     progressFill.style.width = '100%';
 
-    // Hide menus early so they don't distract during countdown
-    seasonWrapper.classList.add('hidden');
-    objektWrapper.classList.add('hidden');
-    flipBtn.classList.add('hidden');
+    // Render menus completely transparent without breaking flex height flow
+    seasonWrapper.classList.add('invisible');
+    objektWrapper.classList.add('invisible');
+    flipBtn.classList.add('invisible');
 
     countdownTimerId = setInterval(() => {
       count--;
@@ -671,10 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadBtn.classList.add('hidden');
     resetBtn.classList.add('hidden');
 
-    // Restore UI selections
-    seasonWrapper.classList.remove('hidden');
-    objektWrapper.classList.remove('hidden');
-    flipBtn.classList.remove('hidden');
+    // Re-enable UI components
+    seasonWrapper.classList.remove('invisible');
+    objektWrapper.classList.remove('invisible');
+    flipBtn.classList.remove('invisible');
 
     statusText.textContent = "Ready to record";
     setTimeout(() => { statusText.style.opacity = '0'; }, 2000);
