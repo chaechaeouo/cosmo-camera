@@ -1,0 +1,253 @@
+:root {
+  --bg-color: #000000;
+  --card-width: 360px;
+  --card-height: 360px;
+  --border-color: rgba(255, 255, 255, 0.8);
+  --tab-bg: linear-gradient(135deg, rgba(160, 200, 220, 0.7), rgba(110, 160, 180, 0.9));
+  --tab-text: #ffffff;
+  --accent-color: #f72585;
+  /* Pinkish-red accent for buttons */
+  --accent-hover: #b5179e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 500px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 20px;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.logo span {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #888;
+  margin-top: 5px;
+}
+
+.camera-stage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+  z-index: 5;
+}
+
+/* 3D Wrapper for hovering/animating the whole card - removed 3D per user request */
+.photocard-wrapper {
+  position: relative;
+  width: var(--card-width);
+  height: var(--card-height);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.photocard-wrapper:hover {
+  transform: scale(1.02);
+}
+
+.photocard {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 12px;
+  background-color: #111;
+  overflow: hidden;
+}
+
+/* The actual video feed */
+#camera-preview,
+#video-playback {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.05) saturate(1.1);
+  /* Subtle aesthetic filter */
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Objekt video inside the camera view */
+#objekt-video {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 33%;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 4;
+}
+
+/* Controls section below the card */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+  height: 80px;
+}
+
+.record-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: transparent;
+  border: 3px solid white;
+  padding: 5px;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.record-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #555;
+}
+
+.record-btn:disabled .record-icon {
+  background-color: #555;
+}
+
+.record-icon {
+  width: 100%;
+  height: 100%;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.record-btn:active:not(:disabled) .record-icon {
+  transform: scale(0.9);
+}
+
+/* Recording State */
+.record-btn.recording .record-icon {
+  border-radius: 8px;
+  /* Turn to square */
+  transform: scale(0.5);
+  background-color: #ff003c;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 15px rgba(255, 0, 60, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 60, 0);
+  }
+}
+
+.status-text {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 14px;
+  color: #aaa;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Select Dropdown Styling */
+select.secondary-btn {
+  outline: none;
+}
+
+select.secondary-btn option {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 12px;
+}
+
+select.secondary-btn:focus {
+  border-color: var(--accent-color);
+}
+
+/* Animations for controls */
+.controls button {
+  animation: slideUp 0.4s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

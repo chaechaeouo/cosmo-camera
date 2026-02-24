@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmo Camera</title>
+  <link rel="stylesheet" href="style.css?v=2">
+  <!-- Using Google Fonts for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1 class="logo">Cosmo <span>Camera</span></h1>
+      <p class="subtitle">Record your digital Objekt</p>
+    </header>
+
+    <!-- Main Camera Area -->
+    <main class="camera-stage">
+      <div class="photocard-wrapper">
+        <div class="photocard" id="photocard">
+          <!-- Video Feed -->
+          <video id="camera-preview" autoplay playsinline muted></video>
+
+          <!-- The Objekt Video in Corner -->
+          <video id="objekt-video" class="hidden" playsinline></video>
+
+          <!-- Recorded Video Playback -->
+          <video id="video-playback" class="hidden" controls playsinline></video>
+        </div>
+      </div>
+    </main>
+
+    <!-- Controls -->
+    <div class="controls">
+      <!-- Video Selection -->
+      <select id="objekt-select" class="secondary-btn">
+        <option value="">Select an Objekt</option>
+      </select>
+
+      <button id="record-btn" class="record-btn" disabled>
+        <div class="record-icon"></div>
+      </button>
+      <div id="status-text" class="status-text">Granting Camera Access...</div>
+      <button id="download-btn" class="secondary-btn hidden">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Save
+      </button>
+      <button id="reset-btn" class="secondary-btn hidden">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <polyline points="3 3 3 8 8 8"></polyline>
+        </svg>
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js?v=16"></script>
+</body>
+
+</html>
