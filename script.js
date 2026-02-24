@@ -107,8 +107,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let animationFrameId;
   let canvasStream = null;
+  let lastRenderTime = 0;
+  let cachedLayout = null;
 
-  function renderCanvas() {
+  window.addEventListener('resize', () => { cachedLayout = null; });
+  window.addEventListener('orientationchange', () => { cachedLayout = null; });
+
+  function renderCanvas(timestamp) {
+    if (!timestamp) timestamp = performance.now();
+
+    // Throttle rendering: 30 FPS when recording/counting down, 1 FPS when idle
+    const targetFPS = (isRecording || isCountingDown) ? 30 : 1;
+    const frameInterval = 1000 / targetFPS;
+
+    if (timestamp - lastRenderTime < frameInterval) {
+      animationFrameId = requestAnimationFrame(renderCanvas);
+      return;
+    }
+    lastRenderTime = timestamp;
+
     // Force the output square resolution to be a crisp HD 1080x1080
     const outputSize = 1080;
     if (canvas.width !== outputSize) {
@@ -147,17 +164,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw PIP video frame permanently on top
       if (!objektVideo.hidden) {
-        const photoCard = document.querySelector('.photocard');
-        const canvasScaleRatio = outputSize / photoCard.clientWidth;
+        if (!cachedLayout) {
+          const photoCard = document.querySelector('.photocard');
+          const PIPStyle = window.getComputedStyle(objektVideo);
+          cachedLayout = {
+            photoCardWidth: photoCard.clientWidth,
+            width: parseFloat(PIPStyle.width),
+            height: parseFloat(PIPStyle.height),
+            left: parseFloat(PIPStyle.left),
+            bottom: parseFloat(PIPStyle.bottom)
+          };
+        }
+
+        const canvasScaleRatio = outputSize / cachedLayout.photoCardWidth;
 
         // Grasp the mathematically perfect layout dimensions computed by the live CSS engine
-        const PIPStyle = window.getComputedStyle(objektVideo);
-        const cssWidth = parseFloat(PIPStyle.width);
-        const cssHeight = parseFloat(PIPStyle.height);
+        const cssWidth = cachedLayout.width;
+        const cssHeight = cachedLayout.height;
 
         // CSS left/bottom are strictly read in pixels to perfectly position on any device
-        const cssLeft = parseFloat(PIPStyle.left);
-        const cssBottom = parseFloat(PIPStyle.bottom);
+        const cssLeft = cachedLayout.left;
+        const cssBottom = cachedLayout.bottom;
 
         // Calculate exact 1080p canvas dimensions utilizing the 1:1 CSS bounding box 
         const bw = cssWidth * canvasScaleRatio;
