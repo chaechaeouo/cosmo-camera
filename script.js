@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let isCountingDown = false;
   let countdownTimerId = null;
   let activeMicStream = null;
+  let objektState = { x: 0, y: 0, scale: 1, rotation: 0 };
+  let startTouches = [];
+  let initialObjektState = null;
   let selectedObjektName = "Cosmo";
   let currentFacingMode = 'environment';
   let statusTimeout = null;
@@ -47,8 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     objektSelect.innerHTML = '<option value="">Select an Objekt</option>';
     objektVideo.removeAttribute('crossOrigin');
     objektVideo.src = "";
-    objektVideo.classList.add('hidden');
+    objjektVideo.classList.add('hidden');
+    objektVideo.hidden = true;
     selectedObjektName = "Cosmo";
+
+    // Reset multi-touch state
+    objektState = { x: 0, y: 0, scale: 1, rotation: 0 };
+    objektVideo.style.transform = `translate(0px, 0px) rotate(0deg) scale(1)`;
 
     const season = e.target.value;
     if (season && videoData[season]) {
@@ -143,16 +151,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw PIP video on top if active or selected
       if (!objektVideo.hidden && objektVideo.src) {
-        const bw = outputSize * 0.33; // Exactly 33% of the square width to match CSS
+        const canvasScaleRatio = outputSize / document.querySelector('.photocard').clientWidth;
 
         const videoAspect = (objektVideo.videoWidth && objektVideo.videoHeight)
           ? (objektVideo.videoHeight / objektVideo.videoWidth)
           : 1.777; // roughly 9:16 fallback
 
+        const bw = outputSize * 0.33; // Exactly 33% of the square width to match CSS
         const bh = bw * videoAspect;
-        // The CSS 20px padding out of a 360px photocard is exactly mathematically scaled by 3 (to 60px) in a 1080p context.
+        // The CSS 20px padding mathematically scaled by 3 (to 60px) in a 1080p context.
         const bx = 60;
         const by = outputSize - bh - 60;
+
+        ctx.save();
+
+        // Move to the exact geometric center of the PIP's default position
+        const cx = bx + (bw / 2);
+        const cy = by + (bh / 2);
+        ctx.translate(cx, cy);
+
+        // Apply interactive multitouch transforms natively mapped into 1080p canvas space
+        ctx.translate(objektState.x * canvasScaleRatio, objektState.y * canvasScaleRatio);
+        ctx.rotate(objektState.rotation * Math.PI / 180);
+        ctx.scale(objektState.scale, objektState.scale);
 
         // Draw the drop shadow matching the CSS box-shadow
         ctx.save();
@@ -162,27 +183,29 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.shadowOffsetY = 12;    // 4px CSS * 3 = 12px
         ctx.fillStyle = "black";
         ctx.beginPath();
-        ctx.roundRect(bx, by, bw, bh, 24);
+        ctx.roundRect(-bw / 2, -bh / 2, bw, bh, 24);
         ctx.fill();
         ctx.restore();
 
         // Draw the inner video clipped safely inside its own rounded corners
         ctx.save();
         ctx.beginPath();
-        ctx.roundRect(bx, by, bw, bh, 24); // 8px * 3 = 24px radius
+        ctx.roundRect(-bw / 2, -bh / 2, bw, bh, 24); // 8px * 3 = 24px radius
         ctx.clip();
 
         if (objektVideo.readyState >= 2) {
-          ctx.drawImage(objektVideo, bx, by, bw, bh);
+          ctx.drawImage(objektVideo, -bw / 2, -bh / 2, bw, bh);
         }
         ctx.restore(); // Exit video clipping path
 
         // Draw the white frame ON TOP of the video so it doesn't get covered
         ctx.beginPath();
-        ctx.roundRect(bx, by, bw, bh, 24);
+        ctx.roundRect(-bw / 2, -bh / 2, bw, bh, 24);
         ctx.lineWidth = 8; // 2.5px CSS * 3 roughly
         ctx.strokeStyle = "white";
         ctx.stroke();
+
+        ctx.restore(); // Exit full PIP transform
       }
 
       // Restore outer photocard clipping region
@@ -240,7 +263,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initCamera();
 
-  // Flip Camera
+  // --- Multi-touch Gesture Handling ---
+  objektVideo.addEventListener('touchstart', (e) => {
+    if (isRecording || objektVideo.hidden) return;
+    e.preventDefault(); // Stop webpage scrolling
+    const touches = Array.from(e.touches);
+    startTouches = touches.map(t => ({ id: t.identifier, x: t.clientX, y: t.clientY }));
+    initialObjektState = { ...objektState };
+  }, { passive: false });
+
+  objektVideo.addEventListener('touchmove', (e) => {
+    if (!startTouches.length || isRecording) return;
+    e.preventDefault();
+    const touches = Array.from(e.touches);
+
+    if (touches.length === 1 && startTouches.length === 1) {
+      // 1-Finger drag (Panning)
+      const dx = touches[0].clientX - startTouches[0].x;
+      const dy = touches[0].clientY - startTouches[0].y;
+      objektState.x = initialObjektState.x + dx;
+      objektState.y = initialObjektState.y + dy;
+    }
+    else if (touches.length >= 2 && startTouches.length >= 2) {
+      // 2-Finger Pitch and Rotate (and dragging simultaneously)
+      const currentCenter = {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2
+      };
+      const startCenter = {
+        x: (startTouches[0].x + startTouches[1].x) / 2,
+        y: (startTouches[0].y + startTouches[1].y) / 2
+      };
+
+      const dx = currentCenter.x - startCenter.x;
+      const dy = currentCenter.y - startCenter.y;
+
+      const currentDist = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
+      const startDist = Math.hypot(startTouches[1].x - startTouches[0].x, startTouches[1].y - startTouches[0].y);
+      const currentAngle = Math.atan2(touches[1].clientY - touches[0].clientY, touches[1].clientX - touches[0].clientX) * 180 / Math.PI;
+      const startAngle = Math.atan2(startTouches[1].y - startTouches[0].y, startTouches[1].x - startTouches[0].x) * 180 / Math.PI;
+
+      const scaleDelta = startDist > 0 ? (currentDist / startDist) : 1;
+      const angleDelta = currentAngle - startAngle;
+
+      objektState.x = initialObjektState.x + dx;
+      objektState.y = initialObjektState.y + dy;
+      objektState.scale = initialObjektState.scale * scaleDelta;
+      objektState.rotation = initialObjektState.rotation + angleDelta;
+    }
+
+    // Push the math directly into UI rendering
+    objektVideo.style.transform = `translate(${objektState.x}px, ${objektState.y}px) rotate(${objektState.rotation}deg) scale(${objektState.scale})`;
+  }, { passive: false });
+
+  objektVideo.addEventListener('touchend', (e) => {
+    startTouches = [];
+  });
+
+
+  // --- Camera & Recording Controls ---
   flipBtn.addEventListener('click', () => {
     if (isRecording) {
       console.warn("Cannot flip camera while actively recording.");
