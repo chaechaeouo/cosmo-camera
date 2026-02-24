@@ -7,9 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText = document.getElementById('status-text');
   const countdownProgress = document.getElementById('countdown-progress');
   const progressFill = document.getElementById('progress-fill');
+  const seasonWrapper = document.getElementById('season-wrapper');
   const seasonDisplay = document.getElementById('season-display');
   const seasonLabel = document.getElementById('season-label');
   const seasonOptions = document.getElementById('season-options');
+  const objektWrapper = document.getElementById('objekt-wrapper');
   const objektDisplay = document.getElementById('objekt-display');
   const objektLabel = document.getElementById('objekt-label');
   const objektOptions = document.getElementById('objekt-options');
@@ -472,8 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000);
 
     // Restore UI
-    seasonSelect.classList.remove('hidden');
-    objektSelect.classList.remove('hidden');
+    seasonWrapper.classList.remove('hidden');
+    objektWrapper.classList.remove('hidden');
     flipBtn.classList.remove('hidden');
     countdownProgress.classList.add('hidden');
 
@@ -573,8 +575,8 @@ document.addEventListener('DOMContentLoaded', () => {
       countdownProgress.classList.add('hidden');
 
       // Hide UI selections when filming
-      seasonSelect.classList.add('hidden');
-      objektSelect.classList.add('hidden');
+      seasonWrapper.classList.add('hidden');
+      objektWrapper.classList.add('hidden');
       flipBtn.classList.add('hidden');
 
       const finalizeStart = () => {
@@ -624,8 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
     progressFill.style.width = '100%';
 
     // Hide menus early so they don't distract during countdown
-    seasonSelect.classList.add('hidden');
-    objektSelect.classList.add('hidden');
+    seasonWrapper.classList.add('hidden');
+    objektWrapper.classList.add('hidden');
     flipBtn.classList.add('hidden');
 
     countdownTimerId = setInterval(() => {
@@ -670,8 +672,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.classList.add('hidden');
 
     // Restore UI selections
-    seasonSelect.classList.remove('hidden');
-    objektSelect.classList.remove('hidden');
+    seasonWrapper.classList.remove('hidden');
+    objektWrapper.classList.remove('hidden');
     flipBtn.classList.remove('hidden');
 
     statusText.textContent = "Ready to record";
