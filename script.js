@@ -598,8 +598,9 @@ document.addEventListener('DOMContentLoaded', () => {
     recordBtn.classList.remove('recording');
 
     // Turn off the microphone hardware completely to remove background tracking
-    if (mediaRecorder.stream && mediaRecorder.stream.micStream) {
-      mediaRecorder.stream.micStream.getTracks().forEach(track => track.stop());
+    if (activeMicStream) {
+      activeMicStream.getTracks().forEach(track => track.stop());
+      activeMicStream = null;
     }
 
     if (!objektVideo.hidden) {
