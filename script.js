@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRecording = false;
   let selectedObjektName = "Cosmo";
   let currentFacingMode = 'environment';
+  let statusTimeout = null;
 
   // Map of seasons and videos
   const videoData = { "Binary02 501z": ["binary02-chaewon-501z.mp4", "binary02-chaeyeon-501z.mp4", "binary02-dahyun-501z.mp4", "binary02-hayeon-501z.mp4", "binary02-hyerin-501z.mp4", "binary02-jiwoo-501z.mp4", "binary02-jiyeon-501z.mp4", "binary02-joobin-501z.mp4", "binary02-kaede-501z.mp4", "binary02-kotone-501z.mp4", "binary02-lynn-501z.mp4", "binary02-mayu-501z.mp4", "binary02-nakyoung-501z.mp4", "binary02-nien-501z.mp4", "binary02-seoah-501z.mp4", "binary02-seoyeon-501z.mp4", "binary02-shion-501z.mp4", "binary02-sohyun-501z.mp4", "binary02-soomin-501z.mp4", "binary02-sullin-501z.mp4", "binary02-xinyu-501z.mp4", "binary02-yeonji-501z.mp4", "binary02-yooyeon-501z.mp4", "binary02-yubin-501z.mp4"], "Binary02 502z": ["binary02-chaewon-502z.mp4", "binary02-chaeyeon-502z.mp4", "binary02-dahyun-502z.mp4", "binary02-hayeon-502z.mp4", "binary02-hyerin-502z.mp4", "binary02-jiwoo-502z.mp4", "binary02-jiyeon-502z.mp4", "binary02-joobin-502z.mp4", "binary02-kaede-502z.mp4", "binary02-kotone-502z.mp4", "binary02-lynn-502z.mp4", "binary02-mayu-502z.mp4", "binary02-nakyoung-502z.mp4", "binary02-nien-502z.mp4", "binary02-seoah-502z.mp4", "binary02-seoyeon-502z.mp4", "binary02-shion-502z.mp4", "binary02-sohyun-502z.mp4", "binary02-soomin-502z.mp4", "binary02-sullin-502z.mp4", "binary02-xinyu-502z.mp4", "binary02-yeonji-502z.mp4", "binary02-yooyeon-502z.mp4", "binary02-yubin-502z.mp4"] };
@@ -195,7 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recordBtn.disabled = false;
         statusText.textContent = "Ready to record";
         statusText.style.opacity = '1';
-        setTimeout(() => {
+
+        clearTimeout(statusTimeout);
+        statusTimeout = setTimeout(() => {
           if (!isRecording) statusText.style.opacity = '0';
         }, 2000);
 
@@ -314,42 +317,64 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
-    const finalizeStart = () => {
-      mediaRecorder.start();
-      isRecording = true;
-      recordBtn.classList.add('recording');
-
+    const beginFilming = () => {
       // Hide UI selections when filming
       seasonSelect.classList.add('hidden');
       objektSelect.classList.add('hidden');
       flipBtn.classList.add('hidden');
 
-      statusText.textContent = "Recording...";
-      statusText.style.opacity = '1';
-      renderCanvas();
+      const finalizeStart = () => {
+        mediaRecorder.start();
+        isRecording = true;
+        recordBtn.classList.add('recording');
+        statusText.textContent = "Recording...";
+        statusText.style.opacity = '1';
+        renderCanvas();
+      };
+
+      if (!objektVideo.hidden) {
+        objektVideo.currentTime = 0;
+
+        // Wait for the video element to actually emit frames before starting the recorder
+        const onPlaying = () => {
+          objektVideo.removeEventListener('playing', onPlaying);
+          finalizeStart();
+        };
+
+        objektVideo.addEventListener('playing', onPlaying);
+        objektVideo.play();
+
+        // Auto-stop recording when the objekt video finishes
+        objektVideo.onended = () => {
+          if (isRecording) {
+            stopRecording();
+          }
+        };
+      } else {
+        finalizeStart();
+      }
     };
 
-    if (!objektVideo.hidden) {
-      objektVideo.currentTime = 0;
+    // 3-second countdown before filming
+    let count = 3;
+    clearTimeout(statusTimeout);
+    statusText.style.opacity = '1';
+    statusText.textContent = `Starting in ${count}...`;
 
-      // Wait for the video element to actually emit frames before starting the recorder
-      const onPlaying = () => {
-        objektVideo.removeEventListener('playing', onPlaying);
-        finalizeStart();
-      };
+    // Hide menus early so they don't distract during countdown
+    seasonSelect.classList.add('hidden');
+    objektSelect.classList.add('hidden');
+    flipBtn.classList.add('hidden');
 
-      objektVideo.addEventListener('playing', onPlaying);
-      objektVideo.play();
-
-      // Auto-stop recording when the objekt video finishes
-      objektVideo.onended = () => {
-        if (isRecording) {
-          stopRecording();
-        }
-      };
-    } else {
-      finalizeStart();
-    }
+    const timer = setInterval(() => {
+      count--;
+      if (count > 0) {
+        statusText.textContent = `Starting in ${count}...`;
+      } else {
+        clearInterval(timer);
+        beginFilming();
+      }
+    }, 1000);
   }
 
   function stopRecording() {

@@ -110,6 +110,41 @@ body {
   display: none !important;
 }
 
+#countdown-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 140px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 10px var(--accent-color);
+  z-index: 10;
+  pointer-events: none;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+@keyframes pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.countdown-animate {
+  animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 /* Objekt video inside the camera view */
 #objekt-video {
   position: absolute;
