@@ -122,19 +122,21 @@ body {
   z-index: 4;
 }
 
-/* Controls section below the card */
 .controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
   margin-top: 30px;
-  height: 80px;
+  min-height: 80px;
 }
 
 .record-btn {
   width: 70px;
   height: 70px;
+  min-width: 70px;
+  min-height: 70px;
   border-radius: 50%;
   background: transparent;
   border: 3px solid white;
@@ -144,6 +146,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
@@ -194,7 +197,7 @@ body {
 
 .status-text {
   position: absolute;
-  bottom: 120px;
+  bottom: 180px;
   left: 0;
   right: 0;
   text-align: center;
@@ -218,6 +221,10 @@ body {
   gap: 8px;
   backdrop-filter: blur(10px);
   transition: background 0.2s;
+  max-width: 140px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .secondary-btn:hover {

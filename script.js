@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const downloadBtn = document.getElementById('download-btn');
   const resetBtn = document.getElementById('reset-btn');
   const statusText = document.getElementById('status-text');
+  const seasonSelect = document.getElementById('season-select');
   const objektSelect = document.getElementById('objekt-select');
   const objektVideo = document.getElementById('objekt-video');
   const flipBtn = document.getElementById('flip-camera-btn');
@@ -16,44 +17,39 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedObjektName = "Cosmo";
   let currentFacingMode = 'user';
 
-  // List of videos
-  const videos = [
-    "binary02-chaewon-501z.mp4",
-    "binary02-chaeyeon-501z.mp4",
-    "binary02-dahyun-501z.mp4",
-    "binary02-hayeon-501z.mp4",
-    "binary02-hyerin-501z.mp4",
-    "binary02-jiwoo-501z.mp4",
-    "binary02-jiyeon-501z.mp4",
-    "binary02-joobin-501z.mp4",
-    "binary02-kaede-501z.mp4",
-    "binary02-kotone-501z.mp4",
-    "binary02-lynn-501z.mp4",
-    "binary02-mayu-501z.mp4",
-    "binary02-nakyoung-501z.mp4",
-    "binary02-nien-501z.mp4",
-    "binary02-seoah-501z.mp4",
-    "binary02-seoyeon-501z.mp4",
-    "binary02-shion-501z.mp4",
-    "binary02-sohyun-501z.mp4",
-    "binary02-soomin-501z.mp4",
-    "binary02-sullin-501z.mp4",
-    "binary02-xinyu-501z.mp4",
-    "binary02-yeonji-501z.mp4",
-    "binary02-yooyeon-501z.mp4",
-    "binary02-yubin-501z.mp4"
-  ];
+  // Map of seasons and videos
+  const videoData = { "Binary02 501z": ["binary02-chaewon-501z.mp4", "binary02-chaeyeon-501z.mp4", "binary02-dahyun-501z.mp4", "binary02-hayeon-501z.mp4", "binary02-hyerin-501z.mp4", "binary02-jiwoo-501z.mp4", "binary02-jiyeon-501z.mp4", "binary02-joobin-501z.mp4", "binary02-kaede-501z.mp4", "binary02-kotone-501z.mp4", "binary02-lynn-501z.mp4", "binary02-mayu-501z.mp4", "binary02-nakyoung-501z.mp4", "binary02-nien-501z.mp4", "binary02-seoah-501z.mp4", "binary02-seoyeon-501z.mp4", "binary02-shion-501z.mp4", "binary02-sohyun-501z.mp4", "binary02-soomin-501z.mp4", "binary02-sullin-501z.mp4", "binary02-xinyu-501z.mp4", "binary02-yeonji-501z.mp4", "binary02-yooyeon-501z.mp4", "binary02-yubin-501z.mp4"], "Binary02 502z": ["binary02-chaewon-502z.mp4", "binary02-chaeyeon-502z.mp4", "binary02-dahyun-502z.mp4", "binary02-hayeon-502z.mp4", "binary02-hyerin-502z.mp4", "binary02-jiwoo-502z.mp4", "binary02-jiyeon-502z.mp4", "binary02-joobin-502z.mp4", "binary02-kaede-502z.mp4", "binary02-kotone-502z.mp4", "binary02-lynn-502z.mp4", "binary02-mayu-502z.mp4", "binary02-nakyoung-502z.mp4", "binary02-nien-502z.mp4", "binary02-seoah-502z.mp4", "binary02-seoyeon-502z.mp4", "binary02-shion-502z.mp4", "binary02-sohyun-502z.mp4", "binary02-soomin-502z.mp4", "binary02-sullin-502z.mp4", "binary02-xinyu-502z.mp4", "binary02-yeonji-502z.mp4", "binary02-yooyeon-502z.mp4", "binary02-yubin-502z.mp4"] };
 
-  videos.forEach(fileName => {
-    // e.g. "binary02-chaewon-501z.mp4"
-    const namePart = fileName.split('-')[1]; // chaewon
-    const displayName = namePart ? namePart.charAt(0).toUpperCase() + namePart.slice(1) : fileName;
-
+  // Populate seasons
+  Object.keys(videoData).forEach(season => {
     const option = document.createElement('option');
-    option.value = `videos/tripleS/Binary02 501z/${fileName}`;
-    option.textContent = displayName;
-    option.dataset.name = displayName;
-    objektSelect.appendChild(option);
+    option.value = season;
+    option.textContent = season;
+    seasonSelect.appendChild(option);
+  });
+
+  // Handle season selection to populate objekte
+  seasonSelect.addEventListener('change', (e) => {
+    // Clear objekt select
+    objektSelect.innerHTML = '<option value="">Select an Objekt</option>';
+    objektVideo.removeAttribute('crossOrigin');
+    objektVideo.src = "";
+    objektVideo.classList.add('hidden');
+    selectedObjektName = "Cosmo";
+
+    const season = e.target.value;
+    if (season && videoData[season]) {
+      videoData[season].forEach(fileName => {
+        const namePart = fileName.split('-')[1]; // chaewon
+        const displayName = namePart ? namePart.charAt(0).toUpperCase() + namePart.slice(1) : fileName;
+
+        const option = document.createElement('option');
+        option.value = `videos/tripleS/${season}/${fileName}`;
+        option.textContent = displayName;
+        option.dataset.name = displayName;
+        objektSelect.appendChild(option);
+      });
+    }
   });
 
   // Handle video selection
@@ -273,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
       recordBtn.classList.add('recording');
 
       // Hide UI selections when filming
+      seasonSelect.classList.add('hidden');
       objektSelect.classList.add('hidden');
       flipBtn.classList.add('hidden');
 
@@ -328,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.classList.add('hidden');
 
     // Restore UI selections
+    seasonSelect.classList.remove('hidden');
     objektSelect.classList.remove('hidden');
     flipBtn.classList.remove('hidden');
 
