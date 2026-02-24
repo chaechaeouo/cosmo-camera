@@ -50,8 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     objektSelect.innerHTML = '<option value="">Select an Objekt</option>';
     objektVideo.removeAttribute('crossOrigin');
     objektVideo.src = "";
-    objektVideo.classList.add('hidden');
-    objektVideo.hidden = true;
     selectedObjektName = "Cosmo";
 
     // Reset multi-touch state
@@ -93,14 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Required to prevent canvas tainting on GitHub pages / CDNs
       objektVideo.crossOrigin = "anonymous";
       objektVideo.src = e.target.value;
-      objektVideo.classList.remove('hidden');
-      objektVideo.hidden = false;
       selectedObjektName = selectedOption.dataset.name;
     } else {
       objektVideo.removeAttribute('crossOrigin');
       objektVideo.src = "";
-      objektVideo.classList.add('hidden');
-      objektVideo.hidden = true;
       selectedObjektName = "Cosmo";
     }
   });
@@ -151,23 +145,30 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.drawImage(preview, sx, sy, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
       }
 
-      // Draw PIP video on top if active or selected
-      if (!objektVideo.hidden && objektVideo.src) {
-        const canvasScaleRatio = outputSize / document.querySelector('.photocard').clientWidth;
+      // Draw PIP video frame permanently on top
+      if (!objektVideo.hidden) {
+        const photoCard = document.querySelector('.photocard');
+        const canvasScaleRatio = outputSize / photoCard.clientWidth;
 
-        const videoAspect = (objektVideo.videoWidth && objektVideo.videoHeight)
-          ? (objektVideo.videoHeight / objektVideo.videoWidth)
-          : 1.777; // roughly 9:16 fallback
+        // Grasp the mathematically perfect layout dimensions computed by the live CSS engine
+        const PIPStyle = window.getComputedStyle(objektVideo);
+        const cssWidth = parseFloat(PIPStyle.width);
+        const cssHeight = parseFloat(PIPStyle.height);
 
-        const bw = outputSize * 0.33; // Exactly 33% of the square width to match CSS
-        const bh = bw * videoAspect;
-        // The CSS 20px padding mathematically scaled by 3 (to 60px) in a 1080p context.
-        const bx = 60;
-        const by = outputSize - bh - 60;
+        // CSS left/bottom are strictly read in pixels to perfectly position on any device
+        const cssLeft = parseFloat(PIPStyle.left);
+        const cssBottom = parseFloat(PIPStyle.bottom);
+
+        // Calculate exact 1080p canvas dimensions utilizing the 1:1 CSS bounding box 
+        const bw = cssWidth * canvasScaleRatio;
+        const bh = cssHeight * canvasScaleRatio;
+
+        const bx = cssLeft * canvasScaleRatio;
+        const by = outputSize - bh - (cssBottom * canvasScaleRatio);
 
         ctx.save();
 
-        // Move to the exact geometric center of the PIP's default position
+        // Move to the exact geometric center of the PIP's relative layout position
         const cx = bx + (bw / 2);
         const cy = by + (bh / 2);
         ctx.translate(cx, cy);
@@ -196,7 +197,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clip();
 
         if (objektVideo.readyState >= 2) {
-          ctx.drawImage(objektVideo, -bw / 2, -bh / 2, bw, bh);
+          // Replicate CSS object-fit: cover natively in HTML5 Canvas
+          const vw = objektVideo.videoWidth;
+          const vh = objektVideo.videoHeight;
+          const videoRatio = vw / vh;
+          const targetRatio = bw / bh;
+
+          let drawW = vw;
+          let drawH = vh;
+          let drawX = 0;
+          let drawY = 0;
+
+          if (videoRatio > targetRatio) {
+            drawH = vw / targetRatio;
+            drawY = (vh - drawH) / 2;
+          } else {
+            drawW = vh * targetRatio;
+            drawX = (vw - drawW) / 2;
+          }
+          ctx.drawImage(objektVideo, drawX, drawY, drawW, drawH, -bw / 2, -bh / 2, bw, bh);
         }
         ctx.restore(); // Exit video clipping path
 
@@ -475,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCanvas();
       };
 
-      if (!objektVideo.hidden) {
+      if (objektVideo.src) {
         objektVideo.currentTime = 0;
 
         // Wait for the video element to actually emit frames before starting the recorder
