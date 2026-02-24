@@ -43,14 +43,18 @@ body {
 
 .app-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-top: 15px;
+  /* Push the whole header down */
+  margin-bottom: 30px;
+  /* Extra breathing room between title and camera */
   z-index: 10;
 }
 
 .logo {
-  font-size: 24px;
+  font-size: 40px;
+  /* Make it massive like the user's mockup */
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .logo span {
@@ -59,9 +63,11 @@ body {
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #888;
+  font-size: 16px;
+  /* Slightly larger */
+  color: #a0a0a0;
   margin-top: 5px;
+  letter-spacing: 0.5px;
 }
 
 .camera-stage {
