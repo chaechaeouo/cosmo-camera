@@ -14,9 +14,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let mediaRecorder = null;
   let recordedChunks = [];
   let isRecording = false;
+  let isCountingDown = false;
+  let countdownTimerId = null;
+  let activeMicStream = null;
   let selectedObjektName = "Cosmo";
   let currentFacingMode = 'environment';
   let statusTimeout = null;
+
+  // Official tripleS S-number ordering
+  const memberOrder = [
+    "seoyeon", "hyerin", "jiwoo", "chaeyeon", "yooyeon", "soomin", "nakyoung", "yubin",
+    "kaede", "dahyun", "kotone", "yeonji", "nien", "sohyun", "xinyu", "mayu",
+    "lynn", "joobin", "hayeon", "shion", "chaewon", "sullin", "seoah", "jiyeon"
+  ];
 
   // Map of seasons and videos
   const videoData = { "Binary02 501z": ["binary02-chaewon-501z.mp4", "binary02-chaeyeon-501z.mp4", "binary02-dahyun-501z.mp4", "binary02-hayeon-501z.mp4", "binary02-hyerin-501z.mp4", "binary02-jiwoo-501z.mp4", "binary02-jiyeon-501z.mp4", "binary02-joobin-501z.mp4", "binary02-kaede-501z.mp4", "binary02-kotone-501z.mp4", "binary02-lynn-501z.mp4", "binary02-mayu-501z.mp4", "binary02-nakyoung-501z.mp4", "binary02-nien-501z.mp4", "binary02-seoah-501z.mp4", "binary02-seoyeon-501z.mp4", "binary02-shion-501z.mp4", "binary02-sohyun-501z.mp4", "binary02-soomin-501z.mp4", "binary02-sullin-501z.mp4", "binary02-xinyu-501z.mp4", "binary02-yeonji-501z.mp4", "binary02-yooyeon-501z.mp4", "binary02-yubin-501z.mp4"], "Binary02 502z": ["binary02-chaewon-502z.mp4", "binary02-chaeyeon-502z.mp4", "binary02-dahyun-502z.mp4", "binary02-hayeon-502z.mp4", "binary02-hyerin-502z.mp4", "binary02-jiwoo-502z.mp4", "binary02-jiyeon-502z.mp4", "binary02-joobin-502z.mp4", "binary02-kaede-502z.mp4", "binary02-kotone-502z.mp4", "binary02-lynn-502z.mp4", "binary02-mayu-502z.mp4", "binary02-nakyoung-502z.mp4", "binary02-nien-502z.mp4", "binary02-seoah-502z.mp4", "binary02-seoyeon-502z.mp4", "binary02-shion-502z.mp4", "binary02-sohyun-502z.mp4", "binary02-soomin-502z.mp4", "binary02-sullin-502z.mp4", "binary02-xinyu-502z.mp4", "binary02-yeonji-502z.mp4", "binary02-yooyeon-502z.mp4", "binary02-yubin-502z.mp4"] };
@@ -40,14 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const season = e.target.value;
     if (season && videoData[season]) {
-      videoData[season].forEach(fileName => {
+      let optionsData = videoData[season].map(fileName => {
         const namePart = fileName.split('-')[1]; // chaewon
         const displayName = namePart ? namePart.charAt(0).toUpperCase() + namePart.slice(1) : fileName;
+        return { fileName, namePart, displayName };
+      });
 
+      // Sort according to official member S-number
+      optionsData.sort((a, b) => {
+        const indexA = memberOrder.indexOf(a.namePart);
+        const indexB = memberOrder.indexOf(b.namePart);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return a.displayName.localeCompare(b.displayName); // fallback
+      });
+
+      optionsData.forEach(item => {
         const option = document.createElement('option');
-        option.value = `videos/tripleS/${season}/${fileName}`;
-        option.textContent = displayName;
-        option.dataset.name = displayName;
+        option.value = `videos/tripleS/${season}/${item.fileName}`;
+        option.textContent = item.displayName;
+        option.dataset.name = item.displayName;
         objektSelect.appendChild(option);
       });
     }
@@ -230,14 +253,40 @@ document.addEventListener('DOMContentLoaded', () => {
     initCamera();
   });
 
-  // Start/Stop Recording
+  // Start/Stop/Cancel Recording
   recordBtn.addEventListener('click', () => {
-    if (!isRecording) {
+    if (isCountingDown) {
+      cancelCountdown();
+    } else if (!isRecording) {
       startRecording();
     } else {
       stopRecording();
     }
   });
+
+  function cancelCountdown() {
+    clearInterval(countdownTimerId);
+    isCountingDown = false;
+    recordBtn.classList.remove('recording');
+
+    statusText.textContent = "Ready to record";
+    statusText.style.opacity = '1';
+    clearTimeout(statusTimeout);
+    statusTimeout = setTimeout(() => {
+      if (!isRecording && !isCountingDown) statusText.style.opacity = '0';
+    }, 2000);
+
+    // Restore UI
+    seasonSelect.classList.remove('hidden');
+    objektSelect.classList.remove('hidden');
+    flipBtn.classList.remove('hidden');
+
+    // Destroy microphone connection to halt background tracking
+    if (activeMicStream) {
+      activeMicStream.getTracks().forEach(track => track.stop());
+      activeMicStream = null;
+    }
+  }
 
   async function startRecording() {
     recordedChunks = [];
@@ -249,10 +298,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let micStream = null;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      activeMicStream = micStream;
     } catch (err) {
       console.warn("Could not get microphone access: ", err);
     }
     recordBtn.disabled = false;
+
+    // Turn the button red and make it stoppable
+    isCountingDown = true;
+    recordBtn.classList.add('recording');
 
     try {
       // Mix audio tracks from the newly spawned dedicated micStream
@@ -318,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const beginFilming = () => {
+      isCountingDown = false;
       // Hide UI selections when filming
       seasonSelect.classList.add('hidden');
       objektSelect.classList.add('hidden');
@@ -366,12 +421,12 @@ document.addEventListener('DOMContentLoaded', () => {
     objektSelect.classList.add('hidden');
     flipBtn.classList.add('hidden');
 
-    const timer = setInterval(() => {
+    countdownTimerId = setInterval(() => {
       count--;
       if (count > 0) {
         statusText.textContent = `Starting in ${count}...`;
       } else {
-        clearInterval(timer);
+        clearInterval(countdownTimerId);
         beginFilming();
       }
     }, 1000);
