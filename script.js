@@ -390,16 +390,34 @@ document.addEventListener('DOMContentLoaded', () => {
     recordedChunks = [];
   });
 
-  // Download the video
-  downloadBtn.addEventListener('click', () => {
+  // Download or Share the video
+  downloadBtn.addEventListener('click', async () => {
     const type = mediaRecorder ? mediaRecorder.mimeType : 'video/mp4';
+    const filename = `cosmo-${selectedObjektName.toLowerCase()}-${Date.now()}.mp4`;
     const blob = new Blob(recordedChunks, { type });
+
+    // Attempt to use native Web Share API (Mobile: Saves directly to Camera Roll/Albums)
+    const file = new File([blob], filename, { type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Cosmo Recording'
+        });
+        return; // Success, exit out
+      } catch (err) {
+        console.warn("Share API failed or was cancelled:", err);
+        // Fallback to normal download if share sheet fails
+      }
+    }
+
+    // Fallback logic for Desktop or unsupported browsers
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     document.body.appendChild(a);
     a.style = 'display: none';
     a.href = url;
-    a.download = `cosmo-${selectedObjektName.toLowerCase()}-${Date.now()}.mp4`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
   });
