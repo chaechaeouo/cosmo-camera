@@ -20,10 +20,10 @@ body {
   background-color: var(--bg-color);
   color: white;
   font-family: 'Outfit', sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   overflow: hidden;
 }
 
@@ -36,9 +36,8 @@ body {
   flex-direction: column;
   padding: 20px;
   padding-top: max(20px, env(safe-area-inset-top));
-  /* Clear Dynamic Island & Notches */
-  padding-bottom: max(100px, env(safe-area-inset-bottom));
-  /* Added massive 100px exclusion zone strictly for floating mobile URL bars */
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  /* Relying strictly on 100dvh from the body to naturally clear URL bars */
   position: relative;
 }
 
