@@ -102,6 +102,10 @@ body {
   /* Subtle aesthetic filter */
 }
 
+.mirrored {
+  transform: scaleX(-1);
+}
+
 .hidden {
   display: none !important;
 }

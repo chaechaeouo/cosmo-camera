@@ -7,12 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusText = document.getElementById('status-text');
   const objektSelect = document.getElementById('objekt-select');
   const objektVideo = document.getElementById('objekt-video');
+  const flipBtn = document.getElementById('flip-camera-btn');
 
   let stream = null;
   let mediaRecorder = null;
   let recordedChunks = [];
   let isRecording = false;
   let selectedObjektName = "Cosmo";
+  let currentFacingMode = 'user';
 
   // List of videos
   const videos = [
@@ -95,7 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const sx = (preview.videoWidth - sourceSize) / 2;
       const sy = (preview.videoHeight - sourceSize) / 2;
 
-      ctx.drawImage(preview, sx, sy, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+      if (currentFacingMode === 'user') {
+        // Mirror the camera feed horizontally for the selfie camera
+        ctx.save();
+        ctx.translate(outputSize, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(preview, sx, sy, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+        ctx.restore();
+      } else {
+        // Draw back camera normally
+        ctx.drawImage(preview, sx, sy, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+      }
 
       // Draw PIP video on top if active or selected
       if (!objektVideo.hidden && objektVideo.src) {
@@ -124,10 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Camera
   async function initCamera() {
+    if (stream) {
+      // Stop the existing stream immediately to transition to the new camera
+      stream.getTracks().forEach(track => track.stop());
+    }
+
+    // Toggle the UI mirror effect on the preview
+    if (currentFacingMode === 'user') {
+      preview.classList.add('mirrored');
+    } else {
+      preview.classList.remove('mirrored');
+    }
+
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user', // Selfie camera preferred
+          facingMode: currentFacingMode,
           width: { ideal: 1080 },
           height: { ideal: 1920 }
         },
@@ -156,6 +180,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initCamera();
+
+  // Flip Camera
+  flipBtn.addEventListener('click', () => {
+    if (isRecording) {
+      console.warn("Cannot flip camera while actively recording.");
+      return;
+    }
+    currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+    // Disable temporarily
+    flipBtn.disabled = true;
+    setTimeout(() => { flipBtn.disabled = false; }, 800);
+
+    initCamera();
+  });
 
   // Start/Stop Recording
   recordBtn.addEventListener('click', () => {
