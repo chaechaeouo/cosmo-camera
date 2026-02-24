@@ -127,15 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.strokeRect(bx, by, bw, bh);
 
         if (objektVideo.readyState >= 2) {
-          if (currentFacingMode === 'user') {
-            ctx.save();
-            ctx.translate(bx + bw / 2, by + bh / 2);
-            ctx.scale(-1, 1);
-            ctx.drawImage(objektVideo, -bw / 2, -bh / 2, bw, bh);
-            ctx.restore();
-          } else {
-            ctx.drawImage(objektVideo, bx, by, bw, bh);
-          }
+          ctx.drawImage(objektVideo, bx, by, bw, bh);
         }
       }
     }
@@ -149,13 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
       stream.getTracks().forEach(track => track.stop());
     }
 
-    // Toggle the UI mirror effect on the preview and objekt video
+    // Toggle the UI mirror effect on the preview
     if (currentFacingMode === 'user') {
       preview.classList.add('mirrored');
-      objektVideo.classList.add('mirrored');
     } else {
       preview.classList.remove('mirrored');
-      objektVideo.classList.remove('mirrored');
     }
 
     try {
