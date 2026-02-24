@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Draw the white frame ON TOP of the video so it doesn't get covered
         ctx.beginPath();
         ctx.roundRect(bx, by, bw, bh, 24);
-        ctx.lineWidth = 6; // 2px CSS * 3 = 6px
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 8; // 2.5px CSS * 3 roughly
+        ctx.strokeStyle = "white";
         ctx.stroke();
       }
 
