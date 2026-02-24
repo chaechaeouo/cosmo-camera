@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     objektSelect.innerHTML = '<option value="">Select an Objekt</option>';
     objektVideo.removeAttribute('crossOrigin');
     objektVideo.src = "";
-    objjektVideo.classList.add('hidden');
+    objektVideo.classList.add('hidden');
     objektVideo.hidden = true;
     selectedObjektName = "Cosmo";
 
@@ -94,11 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
       objektVideo.crossOrigin = "anonymous";
       objektVideo.src = e.target.value;
       objektVideo.classList.remove('hidden');
+      objektVideo.hidden = false;
       selectedObjektName = selectedOption.dataset.name;
     } else {
       objektVideo.removeAttribute('crossOrigin');
       objektVideo.src = "";
       objektVideo.classList.add('hidden');
+      objektVideo.hidden = true;
       selectedObjektName = "Cosmo";
     }
   });
