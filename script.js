@@ -127,7 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.strokeRect(bx, by, bw, bh);
 
         if (objektVideo.readyState >= 2) {
-          ctx.drawImage(objektVideo, bx, by, bw, bh);
+          if (currentFacingMode === 'user') {
+            ctx.save();
+            ctx.translate(bx + bw / 2, by + bh / 2);
+            ctx.scale(-1, 1);
+            ctx.drawImage(objektVideo, -bw / 2, -bh / 2, bw, bh);
+            ctx.restore();
+          } else {
+            ctx.drawImage(objektVideo, bx, by, bw, bh);
+          }
         }
       }
     }
@@ -141,11 +149,13 @@ document.addEventListener('DOMContentLoaded', () => {
       stream.getTracks().forEach(track => track.stop());
     }
 
-    // Toggle the UI mirror effect on the preview
+    // Toggle the UI mirror effect on the preview and objekt video
     if (currentFacingMode === 'user') {
       preview.classList.add('mirrored');
+      objektVideo.classList.add('mirrored');
     } else {
       preview.classList.remove('mirrored');
+      objektVideo.classList.remove('mirrored');
     }
 
     try {
@@ -214,9 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         if (!canvasStream) {
-          // Force a frame draw before capturing to prevent empty stream crash
-          const size = Math.min(preview.videoWidth || 1080, preview.videoHeight || 1920);
-          ctx.drawImage(preview, 0, 0, size, size, 0, 0, 1080, 1080);
           canvasStream = canvas.captureStream(30);
         }
         combinedStream = new MediaStream([
@@ -274,6 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.start();
       isRecording = true;
       recordBtn.classList.add('recording');
+
+      // Hide UI selections when filming
+      objektSelect.classList.add('hidden');
+      flipBtn.classList.add('hidden');
+
       statusText.textContent = "Recording...";
       statusText.style.opacity = '1';
       renderCanvas();
@@ -324,6 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
     recordBtn.classList.remove('hidden');
     downloadBtn.classList.add('hidden');
     resetBtn.classList.add('hidden');
+
+    // Restore UI selections
+    objektSelect.classList.remove('hidden');
+    flipBtn.classList.remove('hidden');
 
     statusText.textContent = "Ready to record";
     setTimeout(() => { statusText.style.opacity = '0'; }, 2000);
