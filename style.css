@@ -242,6 +242,28 @@ body {
   transition: opacity 0.3s;
 }
 
+.progress-container {
+  position: absolute;
+  bottom: 165px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  /* Gray translucent */
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.3s;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background-color: white;
+  border-radius: 2px;
+}
+
 .secondary-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);

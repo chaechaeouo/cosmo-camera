@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const downloadBtn = document.getElementById('download-btn');
   const resetBtn = document.getElementById('reset-btn');
   const statusText = document.getElementById('status-text');
+  const countdownProgress = document.getElementById('countdown-progress');
+  const progressFill = document.getElementById('progress-fill');
   const seasonSelect = document.getElementById('season-select');
   const objektSelect = document.getElementById('objekt-select');
   const objektVideo = document.getElementById('objekt-video');
@@ -280,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     seasonSelect.classList.remove('hidden');
     objektSelect.classList.remove('hidden');
     flipBtn.classList.remove('hidden');
+    countdownProgress.classList.add('hidden');
 
     // Destroy microphone connection to halt background tracking
     if (activeMicStream) {
@@ -373,6 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const beginFilming = () => {
       isCountingDown = false;
+      countdownProgress.classList.add('hidden');
+
       // Hide UI selections when filming
       seasonSelect.classList.add('hidden');
       objektSelect.classList.add('hidden');
@@ -415,6 +420,14 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTimeout(statusTimeout);
     statusText.style.opacity = '1';
     statusText.textContent = `Starting in ${count}...`;
+
+    // Trigger visual progress bar
+    countdownProgress.classList.remove('hidden');
+    progressFill.style.transition = 'none';
+    progressFill.style.width = '0%';
+    void progressFill.offsetWidth; // Force DOM reflow to restart animation
+    progressFill.style.transition = 'width 3s linear';
+    progressFill.style.width = '100%';
 
     // Hide menus early so they don't distract during countdown
     seasonSelect.classList.add('hidden');

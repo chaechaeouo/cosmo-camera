@@ -57,7 +57,13 @@
       <button id="record-btn" class="record-btn" disabled>
         <div class="record-icon"></div>
       </button>
-      <div id="status-text" class="status-text">Granting Camera Access...</div>
+      <!-- Status Text -->
+      <div class="status-text" id="status-text">Ready to record</div>
+
+      <!-- Countdown Progress Bar -->
+      <div class="progress-container hidden" id="countdown-progress">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
       <button id="download-btn" class="secondary-btn hidden">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
@@ -78,7 +84,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=32"></script>
+  <script src="script.js?v=33"></script>
 </body>
 
 </html>
