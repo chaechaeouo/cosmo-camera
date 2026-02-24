@@ -88,8 +88,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Always draw camera even if not recording, so stream is valid
     if (canvas.width > 0 && canvas.height > 0) {
+      // Create a clipping mask with a 36px (12px * 3) radius for the entire 1080p recording
+      ctx.clearRect(0, 0, outputSize, outputSize);
+      ctx.fillStyle = "#111111"; // Match the dark photocard background
+      ctx.fillRect(0, 0, outputSize, outputSize);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(0, 0, outputSize, outputSize, 36);
+      ctx.clip();
+
       // Crop the center of the camera feed and mathematically fit it to the 1080p square
-      const sourceSize = Math.min(preview.videoWidth, preview.videoHeight);
+      const sourceSize = Math.min(preview.videoWidth || 1080, preview.videoHeight || 1920);
       const sx = (preview.videoWidth - sourceSize) / 2;
       const sy = (preview.videoHeight - sourceSize) / 2;
 
@@ -107,25 +117,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw PIP video on top if active or selected
       if (!objektVideo.hidden && objektVideo.src) {
-        const bw = outputSize * 0.35; // 35% of the square width
+        const bw = outputSize * 0.33; // Exactly 33% of the square width to match CSS
 
-        // Use a default 9:16 aspect ratio (1.5 height modifier) if video hasn't loaded metadata yet
         const videoAspect = (objektVideo.videoWidth && objektVideo.videoHeight)
           ? (objektVideo.videoHeight / objektVideo.videoWidth)
-          : 1.5;
+          : 1.777; // roughly 9:16 fallback
 
         const bh = bw * videoAspect;
-        const bx = 20;
-        const by = outputSize - bh - 20;
+        // The CSS 20px padding out of a 360px photocard is exactly mathematically scaled by 3 (to 60px) in a 1080p context.
+        const bx = 60;
+        const by = outputSize - bh - 60;
 
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-        ctx.strokeRect(bx, by, bw, bh);
+        // Draw the inner video clipped safely inside its own rounded corners
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 24); // 8px * 3 = 24px radius
+        ctx.clip();
 
         if (objektVideo.readyState >= 2) {
           ctx.drawImage(objektVideo, bx, by, bw, bh);
         }
+        ctx.restore(); // Exit video clipping path
+
+        // Draw the white frame ON TOP of the video so it doesn't get covered
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 24);
+        ctx.lineWidth = 6; // 2px CSS * 3 = 6px
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.stroke();
       }
+
+      // Restore outer photocard clipping region
+      ctx.restore();
     }
     animationFrameId = requestAnimationFrame(renderCanvas);
   }
