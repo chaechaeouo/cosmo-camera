@@ -116,13 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderCanvas(timestamp) {
     if (!timestamp) timestamp = performance.now();
 
-    // Throttle rendering: 30 FPS when recording/counting down, 1 FPS when idle
-    const targetFPS = (isRecording || isCountingDown) ? 30 : 1;
-    const frameInterval = 1000 / targetFPS;
-
-    if (timestamp - lastRenderTime < frameInterval) {
-      animationFrameId = requestAnimationFrame(renderCanvas);
-      return;
+    // Throttle rendering to 1 FPS when idle to save battery.
+    // When recording/counting down, run unlocked at 60Hz to prevent sync jitter aliasing.
+    // canvas.captureStream(30) handles the exact 30 FPS downsampling automatically!
+    if (!isRecording && !isCountingDown) {
+      if (timestamp - lastRenderTime < 1000) {
+        animationFrameId = requestAnimationFrame(renderCanvas);
+        return;
+      }
     }
     lastRenderTime = timestamp;
 
