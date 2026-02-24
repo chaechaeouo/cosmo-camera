@@ -128,6 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const bx = 60;
         const by = outputSize - bh - 60;
 
+        // Draw the drop shadow matching the CSS box-shadow
+        ctx.save();
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+        ctx.shadowBlur = 30;       // 10px CSS * 3 = 30px
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 12;    // 4px CSS * 3 = 12px
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, 24);
+        ctx.fill();
+        ctx.restore();
+
         // Draw the inner video clipped safely inside its own rounded corners
         ctx.save();
         ctx.beginPath();
