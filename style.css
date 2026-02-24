@@ -37,8 +37,8 @@ body {
   padding: 20px;
   padding-top: max(20px, env(safe-area-inset-top));
   /* Clear Dynamic Island & Notches */
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-  /* Clear iPhone Home Bar */
+  padding-bottom: max(100px, env(safe-area-inset-bottom));
+  /* Added massive 100px exclusion zone strictly for floating mobile URL bars */
   position: relative;
 }
 
@@ -207,10 +207,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
-  flex-wrap: wrap;
-  /* Graceful degrade on narrow phones */
+  flex-wrap: nowrap;
+  /* Force 50/50 split on the same line permanently */
 }
 
 .center-actions {
@@ -360,8 +360,10 @@ body {
 /* Premium Custom Dropdown Container */
 .custom-select-wrapper {
   position: relative;
-  width: 175px;
-  /* Widened strictly to guarantee long text truncation without colliding with SVG */
+  flex: 1;
+  min-width: 0;
+  /* Prevents text overflow blowouts in flex items */
+  width: auto;
 }
 
 .custom-select {
