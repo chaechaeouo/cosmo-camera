@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let recordedChunks = [];
   let isRecording = false;
   let selectedObjektName = "Cosmo";
-  let currentFacingMode = 'user';
+  let currentFacingMode = 'environment';
 
   // Map of seasons and videos
   const videoData = { "Binary02 501z": ["binary02-chaewon-501z.mp4", "binary02-chaeyeon-501z.mp4", "binary02-dahyun-501z.mp4", "binary02-hayeon-501z.mp4", "binary02-hyerin-501z.mp4", "binary02-jiwoo-501z.mp4", "binary02-jiyeon-501z.mp4", "binary02-joobin-501z.mp4", "binary02-kaede-501z.mp4", "binary02-kotone-501z.mp4", "binary02-lynn-501z.mp4", "binary02-mayu-501z.mp4", "binary02-nakyoung-501z.mp4", "binary02-nien-501z.mp4", "binary02-seoah-501z.mp4", "binary02-seoyeon-501z.mp4", "binary02-shion-501z.mp4", "binary02-sohyun-501z.mp4", "binary02-soomin-501z.mp4", "binary02-sullin-501z.mp4", "binary02-xinyu-501z.mp4", "binary02-yeonji-501z.mp4", "binary02-yooyeon-501z.mp4", "binary02-yubin-501z.mp4"], "Binary02 502z": ["binary02-chaewon-502z.mp4", "binary02-chaeyeon-502z.mp4", "binary02-dahyun-502z.mp4", "binary02-hayeon-502z.mp4", "binary02-hyerin-502z.mp4", "binary02-jiwoo-502z.mp4", "binary02-jiyeon-502z.mp4", "binary02-joobin-502z.mp4", "binary02-kaede-502z.mp4", "binary02-kotone-502z.mp4", "binary02-lynn-502z.mp4", "binary02-mayu-502z.mp4", "binary02-nakyoung-502z.mp4", "binary02-nien-502z.mp4", "binary02-seoah-502z.mp4", "binary02-seoyeon-502z.mp4", "binary02-shion-502z.mp4", "binary02-sohyun-502z.mp4", "binary02-soomin-502z.mp4", "binary02-sullin-502z.mp4", "binary02-xinyu-502z.mp4", "binary02-yeonji-502z.mp4", "binary02-yooyeon-502z.mp4", "binary02-yubin-502z.mp4"] };
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
           width: { ideal: 1080 },
           height: { ideal: 1920 }
         },
-        audio: true
+        audio: false // Do not request mic access on idle preview
       });
       preview.srcObject = stream;
 
@@ -236,11 +236,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function startRecording() {
+  async function startRecording() {
     recordedChunks = [];
+
+    statusText.textContent = "Connecting Microphone...";
+    statusText.style.opacity = '1';
+    recordBtn.disabled = true;
+
+    let micStream = null;
     try {
-      // Mix audio tracks from camera
-      const audioTracks = stream ? stream.getAudioTracks() : [];
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      console.warn("Could not get microphone access: ", err);
+    }
+    recordBtn.disabled = false;
+
+    try {
+      // Mix audio tracks from the newly spawned dedicated micStream
+      const audioTracks = micStream ? micStream.getAudioTracks() : [];
       let combinedStream;
 
       try {
@@ -251,6 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ...canvasStream.getVideoTracks(),
           ...audioTracks
         ]);
+
+        // Attach the micStream physically so the stop function can kill it
+        combinedStream.micStream = micStream;
       } catch (e) {
         console.error("Stream build failed:", e);
         // Fallback to raw camera stream if canvas fails
@@ -340,6 +356,11 @@ document.addEventListener('DOMContentLoaded', () => {
     mediaRecorder.stop();
     isRecording = false;
     recordBtn.classList.remove('recording');
+
+    // Turn off the microphone hardware completely to remove background tracking
+    if (mediaRecorder.stream && mediaRecorder.stream.micStream) {
+      mediaRecorder.stream.micStream.getTracks().forEach(track => track.stop());
+    }
 
     if (!objektVideo.hidden) {
       objektVideo.pause();
